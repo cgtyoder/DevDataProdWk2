@@ -1,0 +1,38 @@
+---
+title: "Leaflet Map"
+author: "Conrad Yoder"
+date: "February 23, 2018"
+output: html_document
+---
+<br>
+
+## Open Data 500 Companies and Locations
+
+Assignment:  Create a web page using R Markdown that features a map created with Leaflet.
+
+First, load in data:
+```{r}
+# This file was obtained from https://gist.github.com/erichurst/7882666
+zips <- read.csv("USZip.csv")
+
+# This file was obtained from http://www.opendata500.com/us/list/
+open500 <- read.csv("us_companies.csv")
+
+# Remove companies with no ZIP Code data
+open500 <- open500[!is.na(open500$zip_code), ]
+
+joined <- merge(open500, zips, by.x = "zip_code", by.y = "ZIP")
+latsLongs <- data.frame(lat = joined$LAT, lng = joined$LNG)
+popups <- paste0("<a href='", joined$url, "'>", joined$company_name, "</a>")
+```
+
+```{r}
+library(leaflet)
+
+myMap <- latsLongs %>% 
+    leaflet() %>% 
+    addProviderTiles(providers$OpenStreetMap) %>%
+    addTiles() %>%
+    addMarkers(popup = popups, clusterOptions = markerClusterOptions())
+myMap
+```
